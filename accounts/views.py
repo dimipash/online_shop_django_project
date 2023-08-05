@@ -46,8 +46,8 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            # messages.success(request, 'You are now logged in!')
-            return redirect('home')
+            messages.success(request, 'You are now logged in!')
+            return redirect('dashboard')
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
@@ -60,3 +60,24 @@ def logout(request):
     auth.logout(request)
     messages.success(request, 'You are now logged out!')
     return redirect('login')
+
+
+@login_required(login_url='login')
+def dashboard(request):
+    return render(request, 'accounts/dashboard.html')
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        if Account.objects.filter(email=email).exists():
+            user = Account.objects.get(email__exact=email)
+            # user.is_active = True
+            # user.save()
+            messages.success(request, 'Please check your email to reset your password')
+
+            return redirect('login')
+        else:
+            messages.error(request, 'Account does not exist!')
+            return redirect('forgot_password')
+    return render(request, 'accounts/forgot_password.html')
