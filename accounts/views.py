@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 
 from carts.models import Cart, CartItem
 from carts.views import _cart_id
+from orders.models import Order
 from .forms import RegistrationForm
 from .models import Account
 import requests
@@ -115,7 +116,12 @@ def logout(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders_count = orders.count()
+    context = {
+        'orders_count': orders_count
+    }
+    return render(request, 'accounts/dashboard.html', context)
 
 
 def forgot_password(request):
@@ -132,3 +138,15 @@ def forgot_password(request):
             messages.error(request, 'Account does not exist!')
             return redirect('forgot_password')
     return render(request, 'accounts/forgot_password.html')
+
+
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    context = {
+        'orders': orders
+    }
+    return render(request, 'accounts/my_orders.html', context)
+
+
+def edit_profile(request):
+    return render(request, 'accounts/edit_profile.html')
