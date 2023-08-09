@@ -5,6 +5,9 @@ from .models import Product, Variation
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('product_name', 'price', 'stock', 'category', 'modified_date', 'is_available')
     prepopulated_fields = {'slug': ('product_name',)}
+    search_fields = ['product_name', 'category']
+    list_filter = ['category', 'is_available']
+    ate_hierarchy = 'modified_date'
 
 
 class VariationAdmin(admin.ModelAdmin):

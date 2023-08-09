@@ -52,6 +52,8 @@ def place_order(request, total=0, quantity=0):
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
+            # Clear cart
+            CartItem.objects.filter(user=request.user).delete()
 
             return render(request, 'orders/order_complete.html')
     else:

@@ -1,12 +1,16 @@
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views import View
 
 from carts.models import Cart, CartItem
 from carts.views import _cart_id
-from orders.models import Order
-from .forms import RegistrationForm
-from .models import Account
+from orders.models import Order, OrderProduct
+from .forms import RegistrationForm, UserForm, UserProfileForm
+from .models import Account, UserProfile
 import requests
 
 
@@ -31,7 +35,7 @@ def register(request):
             user.phone_number = phone_number
             user.save()
             messages.success(request, 'Your account has been created!')
-            return redirect('register')
+            return redirect('login')
 
     else:
         form = RegistrationForm()
@@ -89,7 +93,7 @@ def login(request):
             except:
                 pass
             auth.login(request, user)
-            messages.success(request, 'You are now logged in!')
+            # messages.success(request, 'You are now logged in!')
             url = request.META.get('HTTP_REFERER')
             try:
                 query = requests.utils.urlparse(url).query
@@ -107,46 +111,97 @@ def login(request):
     return render(request, 'accounts/login.html')
 
 
-@login_required(login_url='login')
-def logout(request):
-    auth.logout(request)
-    messages.success(request, 'You are now logged out!')
-    return redirect('login')
+# @login_required(login_url='login')
+# def logout(request):
+#     auth.logout(request)
+#     messages.success(request, 'You are now logged out!')
+#     return redirect('login')
+
+class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
+    login_url = 'login'  # URL to redirect if user is not logged in
+    success_message = "You are now logged out!"
+
+    def get(self, request):
+        auth.logout(request)
+        return redirect(reverse_lazy('login'))
 
 
-@login_required(login_url='login')
-def dashboard(request):
-    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
-    orders_count = orders.count()
-    context = {
-        'orders_count': orders_count
-    }
-    return render(request, 'accounts/dashboard.html', context)
+# @login_required(login_url='login')
+# def dashboard(request):
+#     orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+#     orders_count = orders.count()
+#     context = {
+#         'orders_count': orders_count
+#     }
+#     return render(request, 'accounts/dashboard.html', context)
+
+class DashboardView(LoginRequiredMixin, View):
+    login_url = 'login'  # URL to redirect if user is not logged in
+    template_name = 'accounts/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        orders = Order.objects.order_by('-created_at').filter(user_id=self.request.user.id, is_ordered=True)
+        orders_count = orders.count()
+        context = {
+            'orders_count': orders_count
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
 
 
-def forgot_password(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        if Account.objects.filter(email=email).exists():
-            user = Account.objects.get(email__exact=email)
-            # user.is_active = True
-            # user.save()
-            messages.success(request, 'Please check your email to reset your password')
+# def my_orders(request):
+#     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+#     context = {
+#         'orders': orders
+#     }
+#     return render(request, 'accounts/my_orders.html', context)
 
-            return redirect('login')
-        else:
-            messages.error(request, 'Account does not exist!')
-            return redirect('forgot_password')
-    return render(request, 'accounts/forgot_password.html')
+class MyOrdersView(LoginRequiredMixin, View):
+    login_url = 'login'  # URL to redirect if user is not logged in
+    template_name = 'accounts/my_orders.html'
 
+    def get_context_data(self, **kwargs):
+        orders = Order.objects.filter(user=self.request.user, is_ordered=True).order_by('-created_at')
+        context = {
+            'orders': orders
+        }
+        return context
 
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-    context = {
-        'orders': orders
-    }
-    return render(request, 'accounts/my_orders.html', context)
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
 
 
 def edit_profile(request):
-    return render(request, 'accounts/edit_profile.html')
+    userprofile = get_object_or_404(UserProfile, user=request.user)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('edit_profile')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=userprofile)
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+    }
+    return render(request, 'accounts/order_detail.html', context)
