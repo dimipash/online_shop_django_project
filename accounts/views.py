@@ -1,5 +1,4 @@
 from django.contrib import messages, auth
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,8 +13,15 @@ from .models import Account, UserProfile
 import requests
 
 
-def register(request):
-    if request.method == 'POST':
+class RegisterView(View):
+    template_name = 'accounts/register.html'
+
+    def get(self, request, *args, **kwargs):
+        form = RegistrationForm()
+        context = {'form': form}
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
@@ -34,20 +40,18 @@ def register(request):
             )
             user.phone_number = phone_number
             user.save()
+
             messages.success(request, 'Your account has been created!')
             return redirect('login')
 
-    else:
-        form = RegistrationForm()
-
-    context = {
-        'form': form,
-    }
-    return render(request, 'accounts/register.html', context)
+        context = {'form': form}
+        return render(request, self.template_name, context)
 
 
-def login(request):
-    if request.method == 'POST':
+class LoginView(View):
+    template_name = 'accounts/login.html'
+
+    def post(self, request, *args, **kwargs):
         email = request.POST['email']
         password = request.POST['password']
 
@@ -60,12 +64,11 @@ def login(request):
                 if is_cart_item_exists:
                     cart_item = CartItem.objects.filter(cart=cart)
 
-                    # Get the product variation by cart id
                     product_variation = []
                     for item in cart_item:
                         variation = item.variations.all()
                         product_variation.append(list(variation))
-                    # Get the cart items from the user to access his product variations
+
                     cart_item = CartItem.objects.filter(user=user)
                     ex_var_list = []
                     id = []
@@ -74,8 +77,6 @@ def login(request):
                         ex_var_list.append(list(existing_variation))
                         id.append(item.id)
 
-                    # product_variation = [1, 2, 3, 4, 5]
-                    # ex_var_list = [4, 6, 3,5]
                     for pr in product_variation:
                         if pr in ex_var_list:
                             index = ex_var_list.index(pr)
@@ -93,11 +94,9 @@ def login(request):
             except:
                 pass
             auth.login(request, user)
-            # messages.success(request, 'You are now logged in!')
             url = request.META.get('HTTP_REFERER')
             try:
                 query = requests.utils.urlparse(url).query
-                # next=/cart/checkout/
                 params = dict(x.split('=') for x in query.split('&'))
                 if 'next' in params:
                     nextPage = params['next']
@@ -108,14 +107,11 @@ def login(request):
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
 
-    return render(request, 'accounts/login.html')
+        return redirect('dashboard')
 
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
-# @login_required(login_url='login')
-# def logout(request):
-#     auth.logout(request)
-#     messages.success(request, 'You are now logged out!')
-#     return redirect('login')
 
 class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
     login_url = 'login'  # URL to redirect if user is not logged in
@@ -125,15 +121,6 @@ class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
         auth.logout(request)
         return redirect(reverse_lazy('login'))
 
-
-# @login_required(login_url='login')
-# def dashboard(request):
-#     orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
-#     orders_count = orders.count()
-#     context = {
-#         'orders_count': orders_count
-#     }
-#     return render(request, 'accounts/dashboard.html', context)
 
 class DashboardView(LoginRequiredMixin, View):
     login_url = 'login'  # URL to redirect if user is not logged in
@@ -151,13 +138,6 @@ class DashboardView(LoginRequiredMixin, View):
         context = self.get_context_data()
         return render(request, self.template_name, context)
 
-
-# def my_orders(request):
-#     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-#     context = {
-#         'orders': orders
-#     }
-#     return render(request, 'accounts/my_orders.html', context)
 
 class MyOrdersView(LoginRequiredMixin, View):
     login_url = 'login'  # URL to redirect if user is not logged in
@@ -196,12 +176,9 @@ def edit_profile(request):
     return render(request, 'accounts/edit_profile.html', context)
 
 
-@login_required(login_url='login')
-def order_detail(request, order_id):
-    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
-    order = Order.objects.get(order_number=order_id)
-    context = {
-        'order_detail': order_detail,
-        'order': order,
-    }
-    return render(request, 'accounts/order_detail.html', context)
+class OrderDetailView(LoginRequiredMixin, View):
+    login_url = 'login'
+    template_name = 'accounts/order_detail.html'
+
+    def get(self, request, order_id, *args, **kwargs):
+        return render(request, self.template_name)
