@@ -5,6 +5,8 @@ from orders.forms import OrderForm
 from orders.models import Order
 import datetime
 
+from store.models import Product
+
 
 def place_order(request, total=0, quantity=0):
     current_user = request.user
@@ -52,8 +54,15 @@ def place_order(request, total=0, quantity=0):
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
+
             # Clear cart
             CartItem.objects.filter(user=request.user).delete()
+
+            # Reduce the quantity of the sold products
+            for item in cart_items:
+                product = Product.objects.get(id=item.product_id)
+                product.stock -= item.quantity
+                product.save()
 
             return render(request, 'orders/order_complete.html')
     else:
