@@ -14,7 +14,7 @@ def _cart_id(request):
 def add_cart(request, product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id)
-    # if the user is authenticated
+
     if current_user.is_authenticated:
         product_variation = []
         if request.method == 'POST':
@@ -24,7 +24,7 @@ def add_cart(request, product_id):
 
                 try:
                     variation = Variation.objects.get(product=product, variation_category__iexact=key,
-                                                      variation_value__iexact=value)
+                                                      variation_value__iexact=value) # Case-insensitive search
                     product_variation.append(variation)
                 except:
                     pass
@@ -42,7 +42,7 @@ def add_cart(request, product_id):
                 id.append(item.id)
 
             if product_variation in ex_var_list:
-                # increase the item quantity
+                # increase the variation quantity
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
@@ -59,7 +59,7 @@ def add_cart(request, product_id):
                     item.variations.clear()
                     item.variations.add(*product_variation)
                 item.save()
-        else:
+        else: # new cart item
             cart_item = CartItem.objects.create(
                 product=product,
                 quantity=1,
@@ -87,8 +87,9 @@ def add_cart(request, product_id):
                     pass
 
         try:
-            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart = Cart.objects.get(cart_id=_cart_id(request)) # Get the cart from session
         except Cart.DoesNotExist:
+
             cart = Cart.objects.create(
                 cart_id=_cart_id(request)
             )

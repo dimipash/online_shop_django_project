@@ -1,13 +1,11 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.views import View
-from django.views.generic import DetailView
-
 from carts.models import CartItem
 from carts.views import _cart_id
 from category.models import Category
 from .models import Product
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 
 
 def store(request, category_slug=None):
