@@ -6,7 +6,7 @@ from orders.models import Order
 from .views import place_order, order_complete
 
 
-# Unit tests on Django views
+# Unit tests on views
 class ViewsTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()

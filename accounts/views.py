@@ -4,7 +4,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-
 from carts.models import Cart, CartItem
 from carts.views import _cart_id
 from orders.models import Order, OrderProduct

@@ -13,7 +13,6 @@ class MyAccountManager(BaseUserManager):
         if not username:
             raise ValueError('User must have an username')
 
-        # Validate email format
         try:
             validate_email(email)
         except ValidationError:
@@ -73,11 +72,9 @@ class Account(AbstractBaseUser):
     def __str__(self):
         return self.email
 
-    # if the user is admin he can make changes
     def has_perm(self, perm, obj=None):
         return self.is_admin
 
-    # allows control access to the module
     def has_module_perms(self, add_label):
         return True
 
@@ -101,12 +98,3 @@ class UserProfile(models.Model):
         super().save(*args, **kwargs)
 
 
-@receiver(post_save, sender=Account)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=Account)
-def save_user_profile(sender, instance, **kwargs):
-    instance.userprofile.save()
