@@ -113,7 +113,7 @@ class LoginView(View):
 
 
 class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
-    login_url = 'login'  # URL to redirect if user is not logged in
+    login_url = 'login' 
     success_message = "You are now logged out!"
 
     def get(self, request):
@@ -163,7 +163,9 @@ def edit_profile(request):
             user_form.save()
             profile_form.save()
             messages.success(request, 'Your profile has been updated!')
-            return redirect('edit_profile')
+            user_form = UserForm()
+            profile_form = UserProfileForm()
+            # return redirect('edit_profile')
     else:
         user_form = UserForm(instance=request.user)
         profile_form = UserProfileForm(instance=userprofile)
