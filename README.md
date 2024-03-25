@@ -1,1 +1,3 @@
-# online_shop_django_project
+The Online Shop is a website where you can buy things online. It's made using a programming tool called Python Django Framework. Some cool stuff it can do includes having special types of users, sorting things into groups and listing them, a shopping basket where you can add or remove items, making orders, and after you buy stuff, there are actions like reducing the number of sold items and clearing your shopping basket. Also, if you make an account, you can manage your personal information easily.
+
+Thanks a lot for taking a look at my Online Shop project! If you have any questions or thoughts, please don't hesitate to contact me. Enjoy your shopping! 😊
