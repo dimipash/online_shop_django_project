@@ -128,7 +128,7 @@ class DashboardView(LoginRequiredMixin, View):
     
 
     def get_context_data(self, **kwargs):
-        orders = Order.objects.order_by('-created_at').filter(user_id=self.request.user.id, is_ordered=True)
+        orders = Order.objects.order_by('-created_at').filter(user=self.request.user, is_ordered=True)
         orders_count = orders.count()
         userprofile = UserProfile.objects.get(user_id=self.request.user.id)
         context = {

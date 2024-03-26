@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderProduct
+from .models import Payment, Order, OrderProduct
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -7,6 +7,6 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['status', 'is_ordered']
     search_fields = ['order_number']
 
-
+admin.site.register(Payment)
 admin.site.register(Order)
 admin.site.register(OrderProduct)

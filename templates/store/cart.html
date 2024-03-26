@@ -6,7 +6,7 @@
     <section class="section-content padding-y bg">
 <div class="container">
 
-<!-- ============================ COMPONENT 1 ================================= -->
+
 {% if not cart_items %}
     <h2 class="text-center">Your shopping cart is empty</h2>
     <br>
@@ -63,8 +63,8 @@
                                     <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
                                 </form>
                             </div>
-						</div> <!-- input-group.// -->
-					</div> <!-- col.// -->
+						</div> 
+					</div> 
 	</td>
 	<td>
 		<div class="price-wrap">
@@ -80,7 +80,7 @@
 
 </tbody>
 </table>
-</div> <!-- card.// -->
+</div> 
 
 	</aside> <!-- col.// -->
 	<aside class="col-lg-3">
@@ -105,18 +105,18 @@
 			</p>
 			<a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Checkout </a>
 			<a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
-		</div> <!-- card-body.// -->
-		</div> <!-- card.// -->
+		</div> 
+		</div>
 
-</aside> <!-- col.// -->
+</aside> 
 
 
-</div> <!-- row.// -->
+</div> 
 {% endif %}
-<!-- ============================ COMPONENT 1 END .// ================================= -->
+
 
 </div> <!-- container .//  -->
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+
 
 {% endblock %}

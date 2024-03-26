@@ -40,8 +40,7 @@ def add_cart(request, product_id):
                 ex_var_list.append(list(existing_variation))
                 id.append(item.id)
 
-            if product_variation in ex_var_list:
-                # increase the item quantity
+            if product_variation in ex_var_list:                
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
@@ -52,8 +51,7 @@ def add_cart(request, product_id):
                     product=product,
                     quantity=1,
                     user=current_user,
-                )
-                # create a new cart item
+                )                
                 if len(product_variation) > 0:
                     item.variations.clear()
                     item.variations.add(*product_variation)
@@ -68,9 +66,7 @@ def add_cart(request, product_id):
                 cart_item.variations.clear()
                 cart_item.variations.add(*product_variation)
             cart_item.save()
-        return redirect('cart')
-
-    # if the user is not authenticated
+        return redirect('cart')    
     else:
         product_variation = []
         if request.method == 'POST':
@@ -106,8 +102,7 @@ def add_cart(request, product_id):
                 id.append(item.id)
             print(ex_var_list)
 
-            if product_variation in ex_var_list:
-                # increase the item quantity
+            if product_variation in ex_var_list:                
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
@@ -118,8 +113,7 @@ def add_cart(request, product_id):
                     product=product,
                     quantity=1,
                     cart=cart,
-                )
-                # create a new cart item
+                )                
                 if len(product_variation) > 0:
                     item.variations.clear()
                     item.variations.add(*product_variation)
