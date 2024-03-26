@@ -1,5 +1,6 @@
 from django.contrib import messages, auth
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -153,7 +154,7 @@ class MyOrdersView(LoginRequiredMixin, View):
         context = self.get_context_data()
         return render(request, self.template_name, context)
 
-
+@login_required(login_url='login')
 def edit_profile(request):
     userprofile = get_object_or_404(UserProfile, user=request.user)
     if request.method == 'POST':
@@ -164,8 +165,7 @@ def edit_profile(request):
             profile_form.save()
             messages.success(request, 'Your profile has been updated!')
             user_form = UserForm()
-            profile_form = UserProfileForm()
-            # return redirect('edit_profile')
+            profile_form = UserProfileForm()           
     else:
         user_form = UserForm(instance=request.user)
         profile_form = UserProfileForm(instance=userprofile)
@@ -176,6 +176,31 @@ def edit_profile(request):
     }
     return render(request, 'accounts/edit_profile.html', context)
 
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__exact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                # auth.logout(request)
+                messages.success(request, 'Password updated successfully')
+                return redirect('change_password')
+            else:
+                messages.error(request, 'Please enter valid current password')
+                return redirect('change_password')
+        else:
+            messages.error(request, 'Passwords do not match!')
+            return redirect('change_password')
+        
+    return render(request, 'accounts/change_password.html')
 
 class OrderDetailView(LoginRequiredMixin, View):
     login_url = 'login'

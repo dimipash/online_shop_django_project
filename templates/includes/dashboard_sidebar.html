@@ -18,14 +18,13 @@
         >
             <strong>Edit Profile</strong></a
         >
-        {% comment %}
+
         <a
-            class="list-group-item{% if '/my_orders/' in request.path %}active{% endif %}"
-            href=""
+            class="list-group-item {% if '/change_password/' in request.path %}active{% endif %}"
+            href="{% url 'change_password' %}"
         >
             <strong>Change Password</strong></a
         >
-        {% endcomment %}
     </ul>
     <br />
     <a class="btn btn-light btn-block" href="{% url 'logout' %}">
