@@ -125,12 +125,15 @@ class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
 class DashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     template_name = 'accounts/dashboard.html'
+    
 
     def get_context_data(self, **kwargs):
         orders = Order.objects.order_by('-created_at').filter(user_id=self.request.user.id, is_ordered=True)
         orders_count = orders.count()
+        userprofile = UserProfile.objects.get(user_id=self.request.user.id)
         context = {
-            'orders_count': orders_count
+            'orders_count': orders_count,
+            'userprofile': userprofile,
         }
         return context
 
