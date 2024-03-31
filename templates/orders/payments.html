@@ -10,8 +10,8 @@
         <div class="card">
             <h5 class="card-header">Billing Address</h5>
             <div class="card-body">              
-              <p class="card-text mb-0">{{order.get_full_name}}</p> 
-              <p class="card-text mb-0">{{order.get_full_address}}</p> 
+              <p class="card-text mb-0">{{order.full_name}}</p> 
+              <p class="card-text mb-0">{{order.full_address}}</p> 
               <p class="card-text mb-0">{{order.city}}, {{order.state}}</p> 
               <p class="card-text mb-0">{{order.country}}</p>
               <p class="card-text mb-0">{{order.email}}</p>  
@@ -129,6 +129,7 @@
     var csrftoken = getCookie('csrftoken');
     var orderID = "{{ order.order_number }}";
     var payment_method = 'PayPal';
+    var redirect_url = "{% url 'order_complete' %}"
 	
 	paypal.Buttons({       
 		
@@ -161,8 +162,10 @@
                             status: details.status,
                         }),
                     })
-                    {% comment %} .then(response => response.json())
-                    .then(data => console.log(data)); {% endcomment %}
+                    .then((response) => response.json())
+                    .then((data) => {
+                        window.location.href = redirect_url + '?order_number=' + data.order_number + '&payment_id=' + data.transID;
+                    }); 
                 }
 			});
 		}
