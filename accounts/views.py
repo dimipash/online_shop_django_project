@@ -205,9 +205,18 @@ def change_password(request):
         
     return render(request, 'accounts/change_password.html')
 
-class OrderDetailView(LoginRequiredMixin, View):
-    login_url = 'login'
-    template_name = 'accounts/order_detail.html'
+@login_required
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    subtotal = 0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
 
-    def get(self, request, order_id, *args, **kwargs):
-        return render(request, self.template_name)
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'subtotal': subtotal,
+    }
+
+    return render(request, 'accounts/order_detail.html', context)
