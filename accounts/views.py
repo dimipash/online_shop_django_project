@@ -50,6 +50,8 @@ class RegisterView(View):
 
 class LoginView(View):
     template_name = 'accounts/login.html'
+    login_url = 'dashboard'
+    redirect_field_name = 'next'
 
     def post(self, request, *args, **kwargs):
         email = request.POST['email']
@@ -110,6 +112,12 @@ class LoginView(View):
         return redirect('dashboard')
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            next_url = request.GET.get(self.redirect_field_name)
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(self.login_url)
         return render(request, self.template_name)
 
 
@@ -125,12 +133,14 @@ class LogoutView(LoginRequiredMixin, SuccessMessageMixin, View):
 class DashboardView(LoginRequiredMixin, View):
     login_url = 'login'
     template_name = 'accounts/dashboard.html'
-    
 
     def get_context_data(self, **kwargs):
         orders = Order.objects.order_by('-created_at').filter(user=self.request.user, is_ordered=True)
         orders_count = orders.count()
-        userprofile = UserProfile.objects.get(user_id=self.request.user.id)
+
+        # Retrieve the UserProfile object, or create a new one if it doesn't exist
+        userprofile, created = UserProfile.objects.get_or_create(user=self.request.user)
+
         context = {
             'orders_count': orders_count,
             'userprofile': userprofile,
