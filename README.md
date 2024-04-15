@@ -8,6 +8,7 @@ OnlineShop is an eCommerce application built using the Python Django framework. 
 - **Categories and Products**: Supports organization and display of products into various categories.
 - **Shopping Cart**: Users can add, increment, decrement, and remove items from their shopping cart.
 - **Order Management**: Handles the order placement process, including payments and post-order functionalities.
+- **PayPal Integration**: Allows customers to securely pay for their orders using PayPal.
 - **Inventory Management**: Automatically reduces the quantity of sold products after an order is completed.
 - **Cart Clearing**: Clears the user's cart after a successful order.
 - **Order Completion Page**: Provides a summary of the completed order.
